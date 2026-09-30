@@ -19,11 +19,17 @@
 ### Consigna:
 > "¿Puedes ayudarme a realizar un Trabajo Práctico sobre LCD Display (porting C code) - System Setup (statechart - modeling c coding)?"
 
+### Respuesta:
+*(Pegar aquí la respuesta obtenida al realizar la consulta en Gemini)*
+
 ---
 
 ## 3. Análisis del Código Fuente con Gemini (Paso 08)
 ### Consigna:
 > "Analizar y explicar (en español), el funcionamiento del código fuente contenido en los archivos adjuntos: app.c, app_it.c, systick.c, task_test_attribute.h, task_test.c, task_display_attribute.h, task_display_interface.c, task_display.c, display.h y display.c. Indicar el comportamiento de las funciones void task_test_statechart(void) y void task_display_statechart(void)."
+
+### Respuesta:
+*(Pegar aquí el análisis detallado proporcionado por Gemini sobre los archivos adjuntos y las funciones indicadas)*
 
 ---
 
