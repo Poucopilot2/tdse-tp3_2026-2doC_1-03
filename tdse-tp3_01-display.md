@@ -56,8 +56,59 @@ Esta etapa consiste en diseñar la lógica de interfaz de usuario mediante un me
 ### Consigna:
 > "Analizar y explicar (en español), el funcionamiento del código fuente contenido en los archivos adjuntos: app.c, app_it.c, systick.c, task_test_attribute.h, task_test.c, task_display_attribute.h, task_display_interface.c, task_display.c, display.h y display.c. Indicar el comportamiento de las funciones void task_test_statechart(void) y void task_display_statechart(void)."
 
-### Respuesta:
-*(Pegar aquí el análisis detallado proporcionado por Gemini sobre los archivos adjuntos y las funciones indicadas)*
+### Respuesta:# Sistema Embebido Bare Metal - Controlador LCD HD44780
+
+Este proyecto implementa un sistema embebido **Bare Metal impulsado por eventos y disparado por tiempo** (*Event-Triggered System / Time-Triggered Architecture*). 
+
+## Arquitectura General
+El planificador (*scheduler*) es de ejecución cooperativa y periódica con un período de tick de **1 ms**. El sistema gestiona la actualización periódica de una pantalla LCD HD44780 de 2 líneas x 16 caracteres y mide los tiempos de ejecución (*LET, BCET, WCET*) de cada tarea utilizando el contador de ciclos del núcleo ARM (DWT).
+
+---
+
+## Estructura del Proyecto y Archivos Fuente
+
+### Núcleo de la Aplicación
+* **`app.c`**: Contiene el punto de entrada de la aplicación en el ciclo principal y el despachador de tareas. Define las estructuras para las tareas (`task_cfg_t`) y métricas de rendimiento (`NOE`, `LET`, `BCET`, `WCET`). Gestiona la inicialización de tareas, interrupciones y el bucle principal de actualización.
+* **`app_it.c`**: Maneja los eventos de interrupción a nivel de aplicación, incluyendo el callback del SysTick (cada 1 ms) que incrementa el contador global de ticks, y las interrupciones externas (GPIO/botones).
+* **`systick.c`**: Implementa `systick_delay_us()`, proporcionando retardos bloqueantes precisos en microsegundos usando los registros del temporizador SysTick.
+
+### Tarea de Prueba (Integración)
+* **`task_test.c`**: Implementa la lógica de prueba del sistema. Inicializa el entorno de prueba y envía los mensajes iniciales al display. Ejecuta periódicamente la máquina de estados de prueba.
+* **`task_test_attribute.h`**: Define la estructura de datos `task_test_dta_t` con las variables de estado (`tick` y `counter`).
+
+### Tarea de Pantalla y Comunicación
+* **`task_display.c`**: Módulo principal para el control de la tarea de pantalla. Inicializa el driver en modo GPIO de 4 bits y actualiza periódicamente la máquina de estados del display.
+* **`task_display_interface.c`**: Provee la API `put_event_task_display()` para que otras tareas envíen texto a la pantalla, escribiendo en el buffer y levantando banderas de actualización.
+* **`task_display_attribute.h`**: Define constantes de la pantalla (2x16), eventos (`EV_DSP_UPDATE`), estados (`ST_DSP_IDLE`, `ST_DSP_UPDATE`) y la memoria de caracteres (buffer `ddram`).
+
+### Driver de Hardware (LCD HD44780)
+* **`display.c`**: Controlador físico de bajo nivel. Maneja la secuencia de arranque, posicionamiento del cursor, envío de comandos/datos, y manipulación directa de los pines GPIO.
+* **`display.h`**: Encabezado público del driver, definiendo opciones de bus (4 u 8 bits) y la estructura principal del controlador.
+
+---
+
+## Máquinas de Estados (FSM)
+
+### Comportamiento de `task_test_statechart()`
+Gestiona la ejecución periódica de la tarea de prueba no bloqueante:
+1. **Incremento continuo:** Aumenta un contador general en cada iteración (cada 1 ms).
+2. **Temporizador de Eventos:** Decrementa un temporizador `tick`. Cuando este llega a 0 (1 segundo):
+   * Reinicia el temporizador a 1000 ms.
+   * Envía la plantilla de texto `"Test Nro: ******"` a la segunda línea del display.
+   * Calcula los segundos transcurridos dividiendo el contador total por 1000.
+   * Formatea este valor numérico y lo envía para ser dibujado sobre la plantilla.
+
+### Comportamiento de `task_display_statechart()`
+Controla la actualización física de la pantalla LCD basándose en eventos:
+* **Estado `ST_DSP_IDLE` (Reposo):**
+  * Monitorea pasivamente si existe una solicitud de actualización (bandera activada y evento `EV_DSP_UPDATE`).
+  * Al detectar una solicitud válida, transiciona al estado de actualización.
+* **Estado `ST_DSP_UPDATE` (Actualización):**
+  * Desactiva la bandera de solicitud para evitar dobles escrituras.
+  * Resetea las coordenadas del cursor.
+  * Transmite secuencialmente todo el contenido del buffer de la primera línea a la pantalla física.
+  * Repite el proceso para el buffer de la segunda línea.
+  * Retorna automáticamente al estado `ST_DSP_IDLE`.
 
 ---
 
