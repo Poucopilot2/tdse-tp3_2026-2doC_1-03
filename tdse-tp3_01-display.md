@@ -119,4 +119,23 @@ Controla la actualización física de la pantalla LCD basándose en eventos:
   * `task_dta_list[...]`: ...
 
 ### Análisis de Restricciones Temporales:
-*(Analizar si los tiempos registrados cumplen con las restricciones temporales requeridas por el ejecutor cíclico)*
+### Valores de `task_dta_list` (Tarea 0)
+
+Luego de varias ejecuciones de la función `app_update()`, se registraron los siguientes valores para la primera tarea (`task_dta_list[0]`):
+
+| Métrica | Descripción | Valor | Unidad |
+| :--- | :--- | :--- | :--- |
+| **NOE** | Number Of Executions (Número de ejecuciones) | 313910 | - |
+| **LET** | Last Execution Time (Último tiempo de ejecución) | 2 | µs |
+| **BCET** | Best Case Execution Time (Mejor tiempo de ejecución) | 2 | µs |
+| **WCET** | Worst Case Execution Time (Peor tiempo de ejecución) | 37 | µs |
+
+---
+
+### Análisis de las restricciones temporales del ejecutor cíclico
+
+A partir de los datos recolectados en la tabla, se puede confirmar que la tarea **cumple perfectamente** con las restricciones temporales impuestas por el ejecutor cíclico. 
+
+El parámetro más crítico a evaluar es el **WCET** (Peor Tiempo de Ejecución), el cual alcanzó un valor máximo de **37 µs**. En este tipo de sistemas, el *tick* del sistema o la ranura de tiempo del ejecutor suele ser de 1 milisegundo (1000 µs). Como el tiempo máximo que toma la tarea en ejecutarse (37 µs) es significativamente menor al período del sistema (1000 µs), se garantiza que la tarea finaliza mucho antes de su fecha límite (deadline). 
+
+Esto asegura que el microcontrolador tiene tiempo de sobra para ejecutar otras tareas planificadas dentro del mismo ciclo sin producir bloqueos ni desbordamientos (overruns).
