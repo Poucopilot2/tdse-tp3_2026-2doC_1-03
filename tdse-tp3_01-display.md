@@ -20,7 +20,35 @@
 > "¿Puedes ayudarme a realizar un Trabajo Práctico sobre LCD Display (porting C code) - System Setup (statechart - modeling c coding)?"
 
 ### Respuesta:
-*(Pegar aquí la respuesta obtenida al realizar la consulta en Gemini)*
+# Asistencia y Guía General: TP3 - LCD Display & System Setup Menu
+
+¡Hola! A continuación, presento un resumen estructurado para abordar la resolución del Trabajo Práctico N° 3, enfocado en la migración de código, modelado de estados y cumplimiento de restricciones temporales en sistemas embebidos.
+
+## 1. Porting C Code (Migración de Mbed a STM32)
+El objetivo de esta fase es adaptar un controlador de pantalla LCD que originalmente estaba escrito en C++ para la plataforma Mbed, llevándolo a C estándar utilizando la capa de abstracción de hardware (HAL) de STM32.
+
+**Puntos clave para la migración:**
+*   **Hardware y Pines:** El LCD opera en modo de 4 bits. Debes mapear los pines originales a los disponibles en la placa NUCLEO-F103RB (D4, D5, D6, D7 para datos; D8 y D9 para control).
+*   **Reemplazo de Clases C++:** Las instancias de la clase `DigitalOut` de Mbed (ej. `DigitalOut displayD4(D4);`) deben eliminarse. En su lugar, debes configurar los pines usando STM32CubeIDE (`.ioc`).
+*   **Escritura de Salidas:** Las asignaciones directas (ej. `displayD4 = value;`) deben reemplazarse por la función de la HAL: `HAL_GPIO_WritePin((GPIO_TypeDef*)D4_GPIO_Port, (uint16_t)D4_Pin, (GPIO_PinState)value);`.
+*   **Manejo de Tiempos (Delays):** Las demoras bloqueantes de Mbed (`delay(X)`) deben sustituirse por `HAL_Delay()` para tiempos mayores a 1 ms, o por `systick_delay_us()` para microsegundos.
+
+## 2. LCD Display Statechart (Modelado y Codificación en C)
+Para evitar que las rutinas del display bloqueen el sistema, se debe implementar una máquina de estados (Statechart) utilizando Itemis Create.
+
+**Consideraciones del diseño:**
+*   El objetivo del diagrama de estados es enviar una sola instrucción o dato al display cada vez que el planificador (ejecutor cíclico) llame a la tarea (ej. cada 1 ms).
+*   Esto garantiza que se cumplan las **restricciones temporales** del ejecutor cíclico, evitando cuellos de botella en la ejecución.
+*   Una vez simulado correctamente en Itemis Create, el modelo se debe codificar en C dentro de `task_display.c`.
+
+## 3. System Setup Menu (Modelado e Integración)
+Esta etapa consiste en diseñar la lógica de interfaz de usuario mediante un menú jerárquico navegable con pulsadores.
+
+**Características del Menú:**
+*   **Niveles:** Cuenta con 4 niveles de profundidad (`Main`, `Menu #1`, `Menu #2`, `Menu #3`).
+*   **Navegación:** Se utilizan tres eventos principales generados por los botones: `Enter`, `Next` y `Escape`.
+*   **Implementación:** Es recomendable utilizar variables, arreglos y estructuras en C junto con pseudoestados de tipo "Choice" en Itemis Create para manejar la selección de parámetros (como encendido de motores, velocidad y sentido de giro).
+*   **Integración de Hardware:** El sistema final integrará el LCD, los LEDs integrados (ej. LD2) y un teclado de membrana de 1x4 para interactuar con la tarea `task_system_update()`.
 
 ---
 
