@@ -1,5 +1,11 @@
-# FIUBA - Taller de Sistemas Embebidos
-## TP3 - Actividad 01: LCD Display Driver (porting C code)
+# FIUBA - Electrónica - Taller de Sistemas Embebidos
+## Trabajo Práctico N°: 3 - LCD Display Driver (porting C code)
+### 2026-2doC - 01-3
+### Responsable de la entrega:
+| Padrón | Apellidos, Nombres | Fecha | Deadline |
+| :----- | :--------------------- | :------: | :-------: |
+| 113786 | Pozo, Lucas Santiago | 30/9 | Semana 08 |
+
 
 * **Archivo de documentación:** `tdse-tp3_01-display.md`
 * **Proyecto STM32:** `tdse-tp3_01-porting_c_code`
